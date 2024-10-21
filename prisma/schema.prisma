@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Mercado {
+  id                 String    @id @default(uuid())
+  nombre_mercado     String    @unique
+  direccion          String
+  latitud            Float
+  longitud           Float
+  Locales            Local[]   // Relationship to Local
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt  
+}
+
+model Local {
+  id                 String    @id @default(uuid())
+  nombre_local       String
+  numero_local       String   
+  permiso_operacion  String
+  tipo_local         String
+  direccion_local    String
+  estado_local       String
+  monto              Decimal   @db.Decimal(10, 2)
+  propietario        String
+  DNI                String
+  telefono           String
+  latitud            Float
+  longitud           Float
+  mercadoId          String
+  Mercado            Mercado   @relation(fields: [mercadoId], references: [id])
+  Facturas           Factura[] // Relación con Factura
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt  
+}
+
+enum Role {
+  USER
+  ADMIN
+  MARKET
+}
+
+model User {
+  id              String   @id @default(uuid())
+  correo          String   @unique
+  nombre          String
+  apellido        String
+  contrasena      String
+  telefono        String
+  dni             String
+  gerencia        String?
+  numero_empleado Int?
+  role            Role     @default(USER)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Factura {
+  id                 String    @id @default(uuid())
+  mercado            String
+  propietario        String
+  nombre_local       String
+  numero_local       Int
+  concepto           String
+  mes                String
+  monto              Decimal   @db.Decimal(10, 2)
+  usuario            String
+  DNI                String
+  permiso_operacion  String
+  localId            String    // Relación con Local
+  Local              Local     @relation(fields: [localId], references: [id])  // Relación con Local
+  correlativo        String    
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
