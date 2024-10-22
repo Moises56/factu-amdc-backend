@@ -28,8 +28,8 @@ export class AuthService {
       throw new UnauthorizedException('Contraseña incorrecta');
     }
 
-    const { contrasena, ...result } = user;
-    console.log(contrasena, result);
+    const { ...result } = user;
+    // console.log(contrasena, result);
     return result;
   }
 

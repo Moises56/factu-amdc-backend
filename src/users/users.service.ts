@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
@@ -62,7 +67,7 @@ export class UsersService {
   }
 
   async updateUser(id: string, data: any) {
-    // tiene que verificar si el usuario existe y retornar la estructura de respuesta deseada con el usuario actualizado, la contraseña debe ser encriptada
+    // Verificar si el usuario existe
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -70,11 +75,23 @@ export class UsersService {
       throw new ConflictException('El usuario no existe');
     }
 
+    // Convertir a numérico el número de empleado
+    const numeroEmpleado = parseInt(data.numero_empleado, 10);
+    if (isNaN(numeroEmpleado)) {
+      throw new BadRequestException(
+        'El número de empleado debe ser un valor numérico',
+      );
+    }
+
+    // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(data.contrasena, 10);
+
+    // Actualizar el usuario
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
         ...data,
+        numero_empleado: numeroEmpleado,
         contrasena: hashedPassword,
       },
     });
